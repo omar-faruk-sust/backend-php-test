@@ -9,6 +9,7 @@
         <th>Description</th>
         <th>Actions</th>
         <th></th>
+        <th></th>
         {% for todo in todos %}
             <tr>
                 <td>{{ todo.id }}</td>
@@ -16,6 +17,14 @@
                 <td>
                     <a href="{{ app.request.baseurl }}/todo/{{ todo.id }}">
                        {{ todo.description }}
+                    </a>
+                </td>
+
+                <td>
+                    <a href="{{ app.request.baseurl }}/todo/{{ todo.id }}/json">
+                        <button class="btn btn-xs btn-info">
+                            view
+                        </button>
                     </a>
                 </td>
 
@@ -46,6 +55,7 @@
                 <td colspan="3">
                     <input type="textbox" name="description" required="required" class="small-6 small-center" placeholder="Description...">
                 </td>
+                <td></td>
                 <td></td>
                 <td>
                     <button type="submit" class="btn btn-lg btn-primary">Add</button>

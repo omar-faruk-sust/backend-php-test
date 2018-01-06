@@ -82,20 +82,19 @@ $app->get('/todo/{id}', function ($id) use ($app) {
     }
 
     if ($id){
-        $sql = "SELECT * FROM todos WHERE id = '$id'";
-        $todo = $app['db']->fetchAssoc($sql);
+        $todoObj = new Todo();
+        $result = $todoObj->getTodoById(intval($id), $user['id']);
 
-        return $app['twig']->render('todo.html', [
-            'todo' => $todo,
-        ]);
-    } else {
-        $sql = "SELECT * FROM todos WHERE user_id = '${user['id']}'";
-        $todos = $app['db']->fetchAll($sql);
-
-        return $app['twig']->render('todos.html', [
-            'todos' => $todos,
-        ]);
+        if($result != null) {
+            return $app['twig']->render('todo.html', [
+                'todo' => $result,
+            ]);
+        }
     }
+
+    return $app->redirect('/todo');
+
+
 })->value('id', null);
 
 
@@ -138,3 +137,23 @@ $app->post('/todo/mark/{id}', function (Request $request, $id) use ($app){
 
     return $app->redirect('/todo');
 });
+
+$app->get('/todo/{id}/json', function ($id) use ($app) {
+    if (null === $user = $app['session']->get('user')) {
+        return $app->redirect('/login');
+    }
+
+    if ($id){
+        $todoObj = new Todo();
+        $result = $todoObj->getTodoById(intval($id), $user['id']);
+
+        if($result != null) {
+            return $app['twig']->render('view.html', [
+                'todo' => json_encode($result),
+            ]);
+        }
+    }
+
+    return $app->redirect('/todo');
+
+})->value('id', null);

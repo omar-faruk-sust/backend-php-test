@@ -14,13 +14,26 @@ use Symfony\Component\BrowserKit\Request;
 
 class Todo extends \RedBeanPHP\SimpleModel
 {
+    /**
+     * table name
+     * @var string
+     */
     protected $table = 'todos';
 
+
+    /**
+     * Get all the todo's
+     * based one condition
+     * @param $userId
+     * @param $limit
+     * @param $page
+     * @return array
+     */
     public function getAll($userId, $limit, $page) {
         $result = [];
         $links = 3;
-        $query      = "SELECT * from ".$this->table." where user_id = $userId";
-        $count =R::getRow("select count(*) as num from ".$this->table." Where user_id=?",[$userId]);
+        $query = "SELECT * from ".$this->table." where user_id = $userId";
+        $count =  R::getRow("select count(*) as num from ".$this->table." Where user_id=?",[$userId]);
         $total = $count["num"];
         $paginator  = new Pagination($query, $total);
 
@@ -32,14 +45,24 @@ class Todo extends \RedBeanPHP\SimpleModel
         return $result;
     }
 
+    /**
+     * To delete an todo
+     * @param $id
+     */
     public function delete($id){
         $query = R::load($this->table, intval($id));
         $result = R::trash($query);
         return $result;
     }
 
+    /**
+     * To insert an row
+     * @param $userId
+     * @param $description
+     * @return int|string
+     */
     public function add($userId, $description) {
-        //R::debug(true);
+
         $todo = R::dispense($this->table);
         $todo->user_id = $userId;
         $todo->description = $description;
@@ -48,6 +71,12 @@ class Todo extends \RedBeanPHP\SimpleModel
         return $id;
     }
 
+    /**
+     * To update an row
+     * @param $id
+     * @param $userId
+     * @return int|string
+     */
     public function update($id, $userId) {
         $todo = R::dispense($this->table);
         $todo->id = $id;
@@ -56,6 +85,19 @@ class Todo extends \RedBeanPHP\SimpleModel
         $result = R::store($todo);
 
         return $result;
+    }
+
+    /**
+     * To get an to single tod
+     * @param $id
+     * @param $userId
+     * @return array
+     */
+    public function getTodoById($id, $userId){
+        $todo = R::getRow( 'SELECT * FROM '.$this->table.' WHERE id = ? AND user_id = ?',
+            [$id, $userId]);
+
+        return $todo;
     }
 
 }

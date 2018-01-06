@@ -26,9 +26,14 @@ class Pagination
         $this->_total = $total;
     }
 
+    /**
+     * This funtion is to return data based on pagination condition
+     * @param int $limit
+     * @param int $page
+     * @return stdClass
+     */
     public function getData($limit = 10, $page = 1)
     {
-
         $this->_limit = $limit;
         $this->_page = $page;
 
@@ -49,6 +54,12 @@ class Pagination
         return $result;
     }
 
+    /**
+     * This function is to create the pagination links
+     * @param $links
+     * @param $list_class
+     * @return string
+     */
     public function createLinks($links, $list_class)
     {
         if ($this->_limit == 'all') {
