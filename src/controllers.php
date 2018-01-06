@@ -62,7 +62,7 @@ $app->get('/todo', function (Request $request) use ($app) {
 
 
     /*** pagination*/
-    $limit = (int) ( isset( $_GET['limit'] ) ) ? $_GET['limit'] : 2;
+    $limit = (int) ( isset( $_GET['limit'] ) ) ? $_GET['limit'] : 10;
     $page  = (int) ( isset( $_GET['page'] ) ) ? $_GET['page'] : 1;
 
     $todo  = new Todo();
