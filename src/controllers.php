@@ -1,5 +1,7 @@
 <?php
 
+use Omar\Models\Todo;
+use Omar\Models\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,22 +14,28 @@ $app['twig'] = $app->share($app->extend('twig', function($twig, $app) {
 
 $app->get('/', function () use ($app) {
     return $app['twig']->render('index.html', [
-        'readme' => file_get_contents('README.md'),
+        'readme' => file_get_contents('../README.md'),
     ]);
 });
 
 
-$app->match('/login', function (Request $request) use ($app) {
-    $username = $request->get('username');
-    $password = $request->get('password');
+$app->match(/**
+ * @param Request $request
+ * @return \Symfony\Component\HttpFoundation\RedirectResponse
+ */
+    '/login', function (Request $request) use ($app) {
+    $username = filter_var($request->get('username'),FILTER_SANITIZE_STRING);
+    $password = filter_var($request->get('password'), FILTER_SANITIZE_STRING);
 
     if ($username) {
-        $sql = "SELECT * FROM users WHERE username = '$username' and password = '$password'";
-        $user = $app['db']->fetchAssoc($sql);
+        $user = new User();
+        $loginResult = $user->login($username, $password);
 
-        if ($user){
-            $app['session']->set('user', $user);
+        if (!empty($loginResult)){
+            $app['session']->set('user', $loginResult);
             return $app->redirect('/todo');
+        } else {
+            return $app->redirect('/login');
         }
     }
 
@@ -38,6 +46,35 @@ $app->match('/login', function (Request $request) use ($app) {
 $app->get('/logout', function () use ($app) {
     $app['session']->set('user', null);
     return $app->redirect('/');
+});
+
+$app->get('/todo', function (Request $request) use ($app) {
+    if (null === $user = $app['session']->get('user')) {
+        return $app->redirect('/login');
+    }
+
+    $page = (int) $request->get('page');
+    if($page == 0) {
+        $page = 1;
+    }
+    $user = $app['session']->get('user');
+    $userId = $user['id'];
+
+
+    /*** pagination*/
+    $limit = (int) ( isset( $_GET['limit'] ) ) ? $_GET['limit'] : 2;
+    $page  = (int) ( isset( $_GET['page'] ) ) ? $_GET['page'] : 1;
+
+    $todo  = new Todo();
+    $result = $todo->getAll($userId, $limit, $page);
+    /**paination**/
+
+
+
+    return $app['twig']->render('todos.html', [
+        'todos' => $result['todos']->data,
+        'link' => $result['link']
+    ]);
 });
 
 
@@ -73,17 +110,21 @@ $app->post('/todo/add', function (Request $request) use ($app) {
     $user_id = $user['id'];
     $description = $request->get('description');
 
-    $sql = "INSERT INTO todos (user_id, description) VALUES ('$user_id', '$description')";
-    $app['db']->executeUpdate($sql);
+    $todo = new Todo();
+    $insertedId = $todo->add($user_id, $description);
 
-    return $app->redirect('/todo');
+    if($insertedId >0) {
+        return $app->redirect('/todo');
+    } else {
+        die('ddd');
+    }
+
 });
 
 
 $app->match('/todo/delete/{id}', function ($id) use ($app) {
 
-    $sql = "DELETE FROM todos WHERE id = '$id'";
-    $app['db']->executeUpdate($sql);
-
+    $todo = new Todo();
+    $todo->delete($id);
     return $app->redirect('/todo');
 });

@@ -9,6 +9,7 @@ use Silex\Provider\ServiceControllerServiceProvider;
 use Silex\Provider\HttpFragmentServiceProvider;
 use Silex\Provider\DoctrineServiceProvider;
 use DerAlex\Silex\YamlConfigServiceProvider;
+use \RedBeanPHP\R as R;
 
 $app = new Application();
 $app->register(new SessionServiceProvider());
@@ -30,4 +31,9 @@ $app->register(new DoctrineServiceProvider, array(
     ),
 ));
 
+define('SALT', 'salt');
+
+R::setup( 'mysql:host=localhost;dbname=todo',
+    'omar', 'root' );
+R::debug(true);
 return $app;
