@@ -19,8 +19,8 @@ class Todo extends \RedBeanPHP\SimpleModel
     public function getAll($userId, $limit, $page) {
         $result = [];
         $links = 3;
-        $query      = "SELECT * from todos where user_id = $userId";
-        $count =R::getRow("select count(*) as num from todos Where user_id=?",[$userId]);
+        $query      = "SELECT * from ".$this->table." where user_id = $userId";
+        $count =R::getRow("select count(*) as num from ".$this->table." Where user_id=?",[$userId]);
         $total = $count["num"];
         $paginator  = new Pagination($query, $total);
 
@@ -39,13 +39,23 @@ class Todo extends \RedBeanPHP\SimpleModel
     }
 
     public function add($userId, $description) {
-        R::debug(true);
-        $save = R::dispense($this->table);
-        $save->user_id = $userId;
-        $save->description = $description;
-        $id = R::store($save);
+        //R::debug(true);
+        $todo = R::dispense($this->table);
+        $todo->user_id = $userId;
+        $todo->description = $description;
+        $id = R::store($todo);
 
         return $id;
+    }
+
+    public function update($id, $userId) {
+        $todo = R::dispense($this->table);
+        $todo->id = $id;
+        $todo->user_id = $userId;
+        $todo->complete = 1;
+        $result = R::store($todo);
+
+        return $result;
     }
 
 }

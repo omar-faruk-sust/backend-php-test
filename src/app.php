@@ -35,5 +35,5 @@ define('SALT', 'salt');
 
 R::setup( "mysql:=".$app['config']['database']['host'].";dbname=".$app['config']['database']['dbname'],
     $app['config']['database']['user'], $app['config']['database']['password'] );
-R::debug(true);
+
 return $app;

@@ -121,10 +121,20 @@ $app->post('/todo/add', function (Request $request) use ($app) {
     }
 });
 
-
 $app->match('/todo/delete/{id}', function ($id) use ($app) {
 
     $todo = new Todo();
     $todo->delete($id);
+    return $app->redirect('/todo');
+});
+
+$app->post('/todo/mark/{id}', function (Request $request, $id) use ($app){
+    if (null === $user = $app['session']->get('user')) {
+        return $app->redirect('/login');
+    }
+
+    $todoObj = new Todo();
+    $todoObj->update($id, $user['id']);
+
     return $app->redirect('/todo');
 });

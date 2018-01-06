@@ -12,5 +12,3 @@ INSERT INTO todos (user_id, description) VALUES
 (2, 'Lorem ipsum'),
 (2, 'In lacinia est'),
 (2, 'Odio varius gravida');
-
-UPDATE users set password=md5(CONCAT('salt',password));
