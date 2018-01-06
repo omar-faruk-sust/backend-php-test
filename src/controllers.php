@@ -69,8 +69,6 @@ $app->get('/todo', function (Request $request) use ($app) {
     $result = $todo->getAll($userId, $limit, $page);
     /**paination**/
 
-
-
     return $app['twig']->render('todos.html', [
         'todos' => $result['todos']->data,
         'link' => $result['link']
@@ -98,8 +96,7 @@ $app->get('/todo/{id}', function ($id) use ($app) {
             'todos' => $todos,
         ]);
     }
-})
-->value('id', null);
+})->value('id', null);
 
 
 $app->post('/todo/add', function (Request $request) use ($app) {
@@ -108,17 +105,20 @@ $app->post('/todo/add', function (Request $request) use ($app) {
     }
 
     $user_id = $user['id'];
-    $description = $request->get('description');
+    $description = trim(strip_tags($request->get('description')));
 
-    $todo = new Todo();
-    $insertedId = $todo->add($user_id, $description);
+    if($description != "") {
+        $todo = new Todo();
+        $insertedId = $todo->add($user_id, $description);
 
-    if($insertedId >0) {
-        return $app->redirect('/todo');
+        if($insertedId >0) {
+            return $app->redirect('/todo');
+        } else {
+            return $app->redirect('/todo');
+        }
     } else {
-        die('ddd');
+        return $app->redirect('/todo');
     }
-
 });
 
 
