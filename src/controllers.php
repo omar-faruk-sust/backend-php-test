@@ -24,6 +24,8 @@ $app->match('/login', function (Request $request) use ($app) {
     $password = filter_var($request->get('password'), FILTER_SANITIZE_STRING);
 
     if ($username) {
+        $app['session']->getFlashBag()->clear();
+
         $user = new User();
         $loginResult = $user->login($username, $password);
 
@@ -31,7 +33,7 @@ $app->match('/login', function (Request $request) use ($app) {
             $app['session']->set('user', $loginResult);
             return $app->redirect('/todo');
         } else {
-            return $app->redirect('/login');
+            $app['session']->getFlashBag()->add('login_message', "Username or password does not match!");
         }
     }
 
@@ -41,6 +43,8 @@ $app->match('/login', function (Request $request) use ($app) {
 
 $app->get('/logout', function () use ($app) {
     $app['session']->set('user', null);
+    $app['session']->getFlashBag()->clear();
+    $app['session']->getFlashBag()->add('login_message', "Logout!");
     return $app->redirect('/');
 });
 
@@ -55,7 +59,6 @@ $app->get('/todo', function (Request $request) use ($app) {
     }
     $user = $app['session']->get('user');
     $userId = $user['id'];
-
 
     /*** pagination*/
     $limit = (int) ( isset( $_GET['limit'] ) ) ? $_GET['limit'] : 10;
