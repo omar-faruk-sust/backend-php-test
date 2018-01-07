@@ -20,8 +20,8 @@ $app->get('/', function () use ($app) {
 
 
 $app->match('/login', function (Request $request) use ($app) {
-    $username = filter_var($request->get('username'),FILTER_SANITIZE_STRING);
-    $password = filter_var($request->get('password'), FILTER_SANITIZE_STRING);
+    $username = trim(filter_var($request->get('username'),FILTER_SANITIZE_STRING));
+    $password = trim(filter_var($request->get('password'), FILTER_SANITIZE_STRING));
 
     if ($username) {
         $app['session']->getFlashBag()->clear();
@@ -35,6 +35,8 @@ $app->match('/login', function (Request $request) use ($app) {
         } else {
             $app['session']->getFlashBag()->add('login_message', "Username or password does not match!");
         }
+    }else {
+        $app['session']->getFlashBag()->add('login_message', "Username or password must not empty!");
     }
 
     return $app['twig']->render('login.html', array());
