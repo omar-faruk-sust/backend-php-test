@@ -19,11 +19,7 @@ $app->get('/', function () use ($app) {
 });
 
 
-$app->match(/**
- * @param Request $request
- * @return \Symfony\Component\HttpFoundation\RedirectResponse
- */
-    '/login', function (Request $request) use ($app) {
+$app->match('/login', function (Request $request) use ($app) {
     $username = filter_var($request->get('username'),FILTER_SANITIZE_STRING);
     $password = filter_var($request->get('password'), FILTER_SANITIZE_STRING);
 
@@ -91,10 +87,9 @@ $app->get('/todo/{id}', function ($id) use ($app) {
             ]);
         }
     }
-
+    $app['session']->getFlashBag()->clear();
+    $app['session']->getFlashBag()->add('message', "You don't have access on this todo or it does not exist");
     return $app->redirect('/todo');
-
-
 })->value('id', null);
 
 
@@ -103,19 +98,20 @@ $app->post('/todo/add', function (Request $request) use ($app) {
         return $app->redirect('/login');
     }
 
-    $user_id = $user['id'];
-    $description = trim(strip_tags($request->get('description')));
-
+    $description = trim(filter_var($request->get('description'), FILTER_SANITIZE_STRING));
     if($description != "") {
         $todo = new Todo();
-        $insertedId = $todo->add($user_id, $description);
-
+        $insertedId = $todo->add($user['id'], $description);
+        $app['session']->getFlashBag()->clear();
         if($insertedId >0) {
+            $app['session']->getFlashBag()->add('message', 'Todo has been added successfully.');
             return $app->redirect('/todo');
         } else {
+            $app['session']->getFlashBag()->add('message', 'There is an error occurred. Please try again.');
             return $app->redirect('/todo');
         }
     } else {
+        $app['session']->getFlashBag()->add('message', 'Your todo description filed must not be empty. ');
         return $app->redirect('/todo');
     }
 });
@@ -124,17 +120,20 @@ $app->match('/todo/delete/{id}', function ($id) use ($app) {
 
     $todo = new Todo();
     $todo->delete($id);
+    $app['session']->getFlashBag()->clear();
+    $app['session']->getFlashBag()->add('message', 'Todo has been deleted.');
     return $app->redirect('/todo');
 });
 
 $app->post('/todo/mark/{id}', function (Request $request, $id) use ($app){
     if (null === $user = $app['session']->get('user')) {
         return $app->redirect('/login');
-    }
+     }
 
     $todoObj = new Todo();
     $todoObj->update($id, $user['id']);
-
+    $app['session']->getFlashBag()->clear();
+    $app['session']->getFlashBag()->add('message', 'Todo has been marked as complete.');
     return $app->redirect('/todo');
 });
 
@@ -153,7 +152,7 @@ $app->get('/todo/{id}/json', function ($id) use ($app) {
             ]);
         }
     }
-
+    $app['session']->getFlashBag()->clear();
+    $app['session']->getFlashBag()->add('message', "You don't have access on this todo or it does not exist.");
     return $app->redirect('/todo');
-
 })->value('id', null);

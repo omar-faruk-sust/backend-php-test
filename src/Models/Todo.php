@@ -88,13 +88,13 @@ class Todo extends \RedBeanPHP\SimpleModel
     }
 
     /**
-     * To get an to single tod
+     * To get an to single todo
      * @param $id
      * @param $userId
      * @return array
      */
     public function getTodoById($id, $userId){
-        $todo = R::getRow( 'SELECT * FROM '.$this->table.' WHERE id = ? AND user_id = ?',
+        $todo = R::getRow( 'SELECT `id`,`user_id`,`description` FROM '.$this->table.' WHERE id = ? AND user_id = ?',
             [$id, $userId]);
 
         return $todo;
