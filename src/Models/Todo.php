@@ -32,6 +32,7 @@ class Todo extends \RedBeanPHP\SimpleModel
     public function getAll($userId, $limit, $page) {
         $result = [];
         $links = 3;
+        //user_id taken from session so this query is safe
         $query = "SELECT * from ".$this->table." where user_id = $userId";
         $count =  R::getRow("select count(*) as num from ".$this->table." Where user_id=?",[$userId]);
         $total = $count["num"];
@@ -49,10 +50,15 @@ class Todo extends \RedBeanPHP\SimpleModel
      * To delete an todo
      * @param $id
      */
-    public function delete($id){
+    public function delete($id, $userId){
         $query = R::load($this->table, intval($id));
-        $result = R::trash($query);
-        return $result;
+        if($query->user_id == $userId) {
+            $result = R::trash($query);
+            return $result;
+        } else {
+            return false;
+        }
+
     }
 
     /**
