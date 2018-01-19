@@ -33,7 +33,13 @@ $app->register(new YamlConfigServiceProvider(__DIR__.'/../config/config.yml'));
 
 define('SALT', 'salt');
 
-R::setup( "mysql:=".$app['config']['database']['host'].";dbname=".$app['config']['database']['dbname'],
-    $app['config']['database']['user'], $app['config']['database']['password'] );
+try {
+    R::setup( "mysql:=".$app['config']['database']['host'].";dbname=".$app['config']['database']['dbname'],
+        $app['config']['database']['user'], $app['config']['database']['password'] );
+} catch (PDOException $e) {
+    die($e->getMessage());
+}
+
+
 
 return $app;
